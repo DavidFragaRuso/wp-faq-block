@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "dfr/wp-faq-block",
+	"version": "0.1.0",
+	"title": "Gutember Faqs plugin",
+	"category": "widgets",
+	"icon": "list-view",
+	"description": "Create FAQ blocks with schema.",
+	"supports": {
+		"html": false
+	},
+	"textdomain": "wp-faq-block",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css"
+}
