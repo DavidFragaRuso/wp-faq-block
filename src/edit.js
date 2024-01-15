@@ -18,7 +18,7 @@ import { useBlockProps } from '@wordpress/block-editor';
  * 
  * @see https://developer.wordpress.org/block-editor/reference-guides/components/text-control/
  */
-import { TextControl, TextareaControl, Button, Panel, PanelBody, PanelRow, Flex, FlexBlock, IconButton } from '@wordpress/components';
+import { TextControl, TextareaControl, Button, Panel, PanelBody, PanelRow, Flex, FlexBlock } from '@wordpress/components';
 
 /**
  * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
@@ -62,6 +62,12 @@ export default function Edit( { attributes, setAttributes } ) {
 		setAttributes( {faqs} );
 	}
 
+	const handleRemoveFaq = (index) => {
+		const faqs = [...attributes.faqs];
+		faqs.splice(index, 1);
+		setAttributes({ faqs });
+	};
+
 	let faqFields;
 
 	if( attributes.faqs.length ) {
@@ -85,11 +91,11 @@ export default function Edit( { attributes, setAttributes } ) {
 								onChange={ (editAnswer) => handleFaqChangeAnswer( editAnswer, index ) }	
 							/>
 						</FlexBlock>
-						<IconButton
+						<Button
 							className="remove-faq"
 							icon="no-alt"
 							label="Delete FAQ"
-							onClick={ () => {} }
+							onClick={ () => handleRemoveFaq(index)}
 						/>
 					</Flex>
 				</PanelRow>
