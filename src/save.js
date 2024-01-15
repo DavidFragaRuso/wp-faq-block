@@ -25,10 +25,10 @@ export default function save( {attributes} ) {
 	return (
 		<div {...useBlockProps.save()} >
 			<div class="faq-container">
-				<div class="faq-row">
+				<div class="faq-row" itemscope itemtype="https://schema.org/FAQPage">
 					{ faqRender.map( (faq, index) => (
 						<div data-index={index} class="faq-col" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-							<h3 class="faq-question" >{faq.editQuestion}</h3>
+							<h3 class="faq-question" itemprop="name">{faq.editQuestion}</h3>
 							<div class="faq-answer"  itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
 								<div itemprop="text">
 									{faq.editAnswer}
