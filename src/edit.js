@@ -20,6 +20,11 @@ import { useBlockProps } from '@wordpress/block-editor';
  */
 import { TextControl, TextareaControl, Button, Panel, PanelBody, PanelRow, Flex, FlexBlock } from '@wordpress/components';
 
+
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+
+
 /**
  * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
  * Those files can contain any CSS code that gets applied to the editor.
@@ -27,6 +32,33 @@ import { TextControl, TextareaControl, Button, Panel, PanelBody, PanelRow, Flex,
  * @see https://www.npmjs.com/package/@wordpress/scripts#using-css
  */
 import './editor.scss';
+
+const DRAGGABLE_TYPE = 'PANEL_ROW';
+
+const DraggablePanelRow = ({ index, moveRow, ...props }) => {
+	
+	const [{ isDragging }, drag] = useDrag({
+		type: DRAGGABLE_TYPE,
+		item: { index },
+		collect: (monitor) => ({
+			isDragging: monitor.isDragging(),
+		}),
+	});
+
+	const [, drop] = useDrop({
+		accept: 'DRAGGABLE_TYPE',
+		hover: (draggedItem) => {
+			if(draggedItem.index !== index) {
+				moveRow(draggedItem.index, index);
+				draggedItem.index = index;
+			}
+		},
+	});
+
+	return <div ref={(node) => drag(drop(node))} {...props} style={{ opacity: isDragging ? 0.5 : 1, cursor: 'move', marginBottom: '10px' }}>
+		{props.children}
+	</div>;
+};
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -36,19 +68,15 @@ import './editor.scss';
  *
  * @return {WPElement} Element to render.
  */
+
 export default function Edit( { attributes, setAttributes } ) {
 
 	//const { attributes, setAttributes } = props;
 
 	const handleAddFaq = () => {
-		//console.log("Llega");
-		const faqs = [ ...attributes.faqs ];
-		faqs.push( {
-			editQuestion: '',
-		} );
-		//console.log(faqs);
-		setAttributes( { faqs } );
-	}
+		const faqs = [...attributes.faqs, { editQuestion: '', editAnswer: '' }];
+		setAttributes({ faqs });
+	};
 
 	const handleFaqChange = ( editQuestion, index ) => {
 		const faqs = [ ...attributes.faqs ];
@@ -68,54 +96,58 @@ export default function Edit( { attributes, setAttributes } ) {
 		setAttributes({ faqs });
 	};
 
-	let faqFields;
+	const moveRow = (fromIndex, toIndex) => {
+		console.log("Llega");
+		const faqs = [...attributes.faqs];
+		const [movedRow] = faqs.splice(fromIndex, 1);
+		faqs.splice(toIndex, 0, movedRow);
+		setAttributes( {faqs} );
+	};
 
-	if( attributes.faqs.length ) {
-		faqFields = attributes.faqs.map( (faq, index) => {
-			return <fragment key={ index }>
-				<PanelRow>
-					<Flex align="flex-start" >
-						<FlexBlock>
+	return (
+		<DndProvider backend={HTML5Backend}>
+			<div {...useBlockProps()}>
+				<Panel header={__('Faq Panel', 'wp-faq-block')}>
+				<PanelBody>
+					{attributes.faqs.map((faq, index) => (
+					<DraggablePanelRow key={index} index={index} moveRow={moveRow}>
+						<PanelRow>
+						<Flex align="flex-start">
+							<FlexBlock>
 							<TextControl
-								className="question-text" 
-								label={ __('Add question', 'wp-faq-block') }
-								value={ attributes.faqs[ index ].editQuestion }
-								onChange={ (editQuestion) => handleFaqChange( editQuestion, index ) }
+								className="question-text"
+								label={__('Add question', 'wp-faq-block')}
+								value={faq.editQuestion}
+								onChange={(editQuestion) => handleFaqChange(editQuestion, index)}
 							/>
-						</FlexBlock>
-						<FlexBlock>
+							</FlexBlock>
+							<FlexBlock>
 							<TextareaControl
 								className="answer-text"
-								label={ __('Add answer', 'wp-faq-block') }
-								value={ attributes.faqs[ index ].editAnswer }
-								onChange={ (editAnswer) => handleFaqChangeAnswer( editAnswer, index ) }	
+								label={__('Add answer', 'wp-faq-block')}
+								value={faq.editAnswer}
+								onChange={(editAnswer) => handleFaqChangeAnswer(editAnswer, index)}
 							/>
-						</FlexBlock>
-						<Button
+							</FlexBlock>
+							<Button
 							className="remove-faq"
 							icon="no-alt"
 							label="Delete FAQ"
-							onClick={ () => handleRemoveFaq(index)}
-						/>
-					</Flex>
-				</PanelRow>
-			</fragment>
-		} );
-	}
-	
-	return (
-		<div { ...useBlockProps() }>
-			<Panel header={ __( 'Faq Panel', 'wp-faq-block' ) }>
-				<PanelBody>
-					{faqFields}	
+							onClick={() => handleRemoveFaq(index)}
+							/>
+						</Flex>
+						</PanelRow>
+					</DraggablePanelRow>
+					))}
 				</PanelBody>
-				<Button 
+				<Button
 					variant="primary"
-					onClick={ handleAddFaq.bind( this ) }
+					onClick={handleAddFaq}
 				>
-					{ __( 'Add FAQ item', 'wp-faq-block' ) }
+					{__('Add FAQ item', 'wp-faq-block')}
 				</Button>
-			</Panel>	
-		</div>	
+				</Panel>
+			</div>
+		</DndProvider>
 	);
 }
