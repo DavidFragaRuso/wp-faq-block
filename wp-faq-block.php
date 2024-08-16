@@ -19,7 +19,7 @@ function my_faq_block_register_block() {
     wp_register_script(
         'my-faq-block-editor-script',
         plugins_url('blocks.js', __FILE__),
-        array('wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-i18n', 'wp-block-editor'),
+        array('wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n', 'wp-block-editor'),
         filemtime(plugin_dir_path(__FILE__) . 'blocks.js')
     );
 
